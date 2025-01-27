@@ -2,43 +2,21 @@ const express = require('express');
 const app = express();
 const port = 7777;
 const connectDB = require("./config/database");
-const User = require("./models/user");
+const cookieParser = require("cookie-parser");
+const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
+const requestRouter = require("./routes/request");
+const userRouter = require("./routes/user");
+
 
 app.use(express.json());
+app.use(cookieParser());
+app.use("/", authRouter);
+app.use("/profile", profileRouter);
+app.use("/request", requestRouter);
+app.use("/user", userRouter);
 
-app.post("/signup", async(req,res)=>{
-    console.log(req.body);
-    const user = new User(req.body);// creating a new instance of the User Model
-    try{
-        await user.save();
-        res.send("User Added successfully!!");
-    }catch(err){
-        res.status(500).send("User Add operation failed!!");
-    }
 
-});
-
-//Get user by email
-app.get("/user", async(req, res)=>{
-    const userEmail = req.body.email;
-    try{
-       const user = await User.find({email: userEmail});
-       res.send(user);
-    }catch(err){
-        res.status(404).send("Something went wrong!!");
-    }
-
-});
-
-app.get("/feed", async(req, res) => {
-   const userEmail = req.body.email;
-    try{
-       const user = await User.find();
-       res.send(user);
-    }catch(err){
-        res.status(404).send("Something went wrong!!");
-    }
-});
 
 connectDB()
 .then(()=>{
