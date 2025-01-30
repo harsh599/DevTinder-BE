@@ -1,7 +1,8 @@
 const express = require('express');
 const { userAuth } = require('../middlewares/auth');
-const ConnectionRequestModel = require('../models/connectionRequest');
+const ConnectionRequest = require('../models/connectionRequest');
 const User = require('../models/user');
+const mongoose = require("mongoose");
 
 const requestRouter = express.Router(); 
 
@@ -9,21 +10,20 @@ requestRouter.post("/send/:status/:toUserId", userAuth, async(req, res) => {
 
     try{
         const fromUserId = req.user._id;
-        const toUserId = req.params.toUserId;
+        const toUserId = new mongoose.Types.ObjectId(req.params.toUserId);
         const status = req.params.status;
 
         const allowedStatus = ["interested", "ignored"];
-
         if(!allowedStatus.includes(status)){
-            return res.send(400).json({"message": "Invalid status type"});
+            return res.status(400).json({"message": "Invalid status type"});
         }
+        const toUser = await User.findById(toUserId);
 
-        const toUser = User.findById(toUserId);
         if(!toUser){
-            return res.send(404).json({"message": "User Not Found"});
+            return res.status(404).json({"message": "User Not Found"});
         }
 
-        const existingConnectionRequest = await ConnectionRequestModel.findOne({
+        const existingConnectionRequest = await ConnectionRequest.findOne({
            $or: [ // a way to write or condition in mongo db
             { fromUserId: toUserId },
             { fromUserId: toUserId, toUserId: fromUserId}]
@@ -32,19 +32,20 @@ requestRouter.post("/send/:status/:toUserId", userAuth, async(req, res) => {
         if(existingConnectionRequest){
             res.status(400).json({"message": "Connection Request Already Exists"});
         }
+        
 
-        // console.log("Inside reqest route", status, fromUserId, toUserId);
-        const connectionRequest = new ConnectionRequestModel({
-            fromUserId: fromUserId,
-            toUserId: toUserId,
-            status: status
+        const connectionRequest = new ConnectionRequest({
+            fromUserId,
+            toUserId,
+            status
         });
-        // console.log("COnenction save"+ connectionRequest);
         const data = await connectionRequest.save();
 
-        res.json({
-            message:"Connection request sent successfully!!", status: 200, data
-        });
+      res.json({
+        message:
+          req.user.firstName + " is " + status + " in " + toUser.firstName,
+        data,
+      });
 
     }catch(err){
         res.status(400).send("Error: " + err.message);
@@ -64,11 +65,11 @@ requestRouter.post("/review/:status/:requestId", userAuth, async(req, res) => {
             return res.status(400).json({message: "Invalid status type"});
         }
 
-        const connectionRequest = await ConnectionRequestModel.findOne({
-            fromUserId: requestId,
-            toUserId:loggedInUser._id,
-            status:"interested"
-        }).populate("fromUserId",["firstName","lastName"]);//since fromUserId is referenced to User schema, and we want only the firstName and lastName fields
+        const connectionRequest = await ConnectionRequest.findOne({
+                _id: requestId,
+            toUserId: loggedInUser._id,
+            status: "interested",
+        });//since fromUserId is referenced to User schema, and we want only the firstName and lastName fields
 
         if(!connectionRequest){
             return res.status(404).json({message: "Connection request not found"});

@@ -7,7 +7,7 @@ const userAuth = async(req, res, next) => {
     //Read the token
     const {token} = req.cookies;
      if(!token){
-        throw new Error("Invalid Token!!");
+       return res.status(401).send("You are not logged in please log in again!!");
     }
     // decode the token
     const decodedObj = await jwt.verify(token, "abcdefghijklmnopqrstuvwxyz");
@@ -18,7 +18,7 @@ const userAuth = async(req, res, next) => {
         throw new Error("User Not Found!!");
     }
     req.user = user;
-    console.log("Token Verified!!");
+    console.log("Token Verified successfully!!");
     next();
     }
     catch(err){

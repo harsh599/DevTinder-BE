@@ -1,8 +1,7 @@
 const validator = require("validator");
 
 const validateSignUpData = (req)=>{
-    const {firstName, lastName, email, password} = req.body;
-    console.log("Executing validate method");
+    const {firstName, lastName, emailId, password} = req.body;
      if(!firstName || !lastName){
         console.log("First name is absent");
         throw new Error("Name is not valid!!");
@@ -10,7 +9,7 @@ const validateSignUpData = (req)=>{
     else if(firstName.length < 4 || firstName.length > 50){
         console.log("Firstname is not valid!!");
         throw new Error("Name is not valid!!");
-    }else if(!validator.isEmail(email)){
+    }else if(!validator.isEmail(emailId)){
         console.log("Email is not valid!!");
         throw new Error("Email is not valid!!");
     }else if(!validator.isStrongPassword(password)){
@@ -20,7 +19,7 @@ const validateSignUpData = (req)=>{
 }
 
 const validateEditProfileData = (req) => {
-    const allowedEditFields = ["email", "firstName", "lastName", "age", "gender", "photoUrl"];
+    const allowedEditFields = ["emailId", "firstName", "lastName", "age", "gender", "photoUrl", "about", "skills"];
 
     const isEditAllowed = Object.keys(req.body).every(field => allowedEditFields.includes(field));
 
