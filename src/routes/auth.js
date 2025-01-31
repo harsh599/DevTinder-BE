@@ -18,7 +18,7 @@ authRouter.post("/signup", async(req,res)=>{
         const passwordHash = await bcrypt.hash(password, 10);
         const user = new User({firstName, lastName, emailId, password: passwordHash});// creating a new instance of the User Model
         const savedUser = await user.save();
-        const token = await jwt.sign({ _id: savedUser._id }, 'abcdefghijklmnopqrstuvwxyz',{expiresIn: "1d"});//secret data, private key
+        const token = await jwt.sign({ _id: savedUser._id }, process.env.JWT_SECRET_KEY,{expiresIn: "1d"});//secret data, private key
         res.cookie("token",token, {expires: new Date(Date.now() + 8 * 3600000)});
         res.json({message: "User Added successfully!!", data : savedUser});
     }catch(err){
@@ -36,7 +36,7 @@ authRouter.post("/login",async(req,res)=>{
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);//plain password and passwordHash
         if(isPasswordValid){
-            const token = await jwt.sign({ _id: user._id }, 'abcdefghijklmnopqrstuvwxyz',{expiresIn: "1d"});//secret data, private key
+            const token = await jwt.sign({ _id: user._id }, process.env.JWT_SECRET_KEY,{expiresIn: "1d"});//secret data, private key
             res.cookie("token",token);
             res.json({message: "Authentication Success", data: user});
         }else{

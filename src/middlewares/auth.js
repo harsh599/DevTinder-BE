@@ -10,7 +10,7 @@ const userAuth = async(req, res, next) => {
        return res.status(401).send("You are not logged in please log in again!!");
     }
     // decode the token
-    const decodedObj = await jwt.verify(token, "abcdefghijklmnopqrstuvwxyz");
+    const decodedObj = await jwt.verify(token, process.env.JWT_SECRET_KEY);
 
     const {_id} = decodedObj;
     const user = await User.findById(_id);
