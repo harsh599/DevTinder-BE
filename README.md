@@ -38,7 +38,7 @@ This repository contains the **backend services** for Dev Tinder, a developer ne
 ### **1️⃣ Clone the repository**  
 ```bash
   git clone <backend-repo-url>
-  cd dev-tinder-backend
+  cd DevTinder-BE
 ```
 
 ### **2️⃣ Install dependencies**  
